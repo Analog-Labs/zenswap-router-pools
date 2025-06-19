@@ -1,6 +1,6 @@
 {
   "name": "Zenswap Default",
-  "timestamp": "2025-06-13T04:15:33.434Z",
+  "timestamp": "2025-06-18T10:29:34.776Z",
   "version": {
     "major": 0,
     "minor": 1,
@@ -10308,6 +10308,14 @@
       "symbol": "RAD",
       "decimals": 18,
       "logoURI": "https://assets.coingecko.com/coins/images/14013/thumb/radicle.png?1614402918"
+    },
+    {
+      "chainId": 42161,
+      "address": "0x1337420dED5ADb9980CFc35f8f2B054ea86f8aB1",
+      "name": "SQD",
+      "symbol": "SQD",
+      "decimals": 18,
+      "logoURI": "https://assets.coingecko.com/coins/images/37869/standard/New_Logo_SQD_Icon.png?1720048443"
     }
   ]
 }

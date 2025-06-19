@@ -378,6 +378,8 @@ export class SubgraphProviderV3 extends SubgraphProvider<
         return `${base}/5Tf9s7syYLHQzhmtjukjTjmhFwx7c3hrdVxy4jo3TgCC`;
       case ChainId.OPTIMISM:
         return `${base}/EgnS9YE1avupkvCNj9fHnJxppfEmNNywYJtghqiu2pd9`;
+      case ChainId.WORLDCHAIN:
+        return "https://interface.gateway.uniswap.org/v1/graphql";
       default:
         throw new Error(
           `v3 subgraph endpoint for chainId ${this.chainId} is not set`

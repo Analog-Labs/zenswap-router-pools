@@ -14,6 +14,9 @@ const mainnets: ChainConfig[] = [
   { chainId: ChainId.BASE, whitelist: true },
   { chainId: ChainId.AVALANCHE, whitelist: true },
   { chainId: ChainId.OPTIMISM, whitelist: true },
+  { chainId: ChainId.POLYGON, whitelist: true },
+  { chainId: ChainId.UNICHAIN, whitelist: true },
+  { chainId: ChainId.WORLDCHAIN, whitelist: true },
 ];
 
 const testnets: ChainConfig[] = [
