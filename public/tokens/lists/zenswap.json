@@ -9790,6 +9790,14 @@
       "logoURI": "https://assets.kraken.com/marketing/web/icons-uni-webp/s_anlog.webp?i=kds"
     },
     {
+      "chainId": 8453,
+      "address": "0x5305bA038217c391af7E79F6F653C8cbc433DEBa",
+      "name": "Analog Token",
+      "symbol": "ANLOG",
+      "decimals": 12,
+      "logoURI": "https://assets.kraken.com/marketing/web/icons-uni-webp/s_anlog.webp?i=kds"
+    },
+    {
       "chainId": 10,
       "address": "0x14778860E937f509e651192a90589dE711Fb88a9",
       "name": "CYBER",
