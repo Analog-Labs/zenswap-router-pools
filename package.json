@@ -6,7 +6,7 @@
     "url": "https://github.com/zenswaplabs/zenswap-router-pools"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
   "license": "Apache-2.0",
   "private": true,
@@ -14,19 +14,37 @@
   "scripts": {
     "pools:uniswap": "tsx ./scripts/pools/uniswap/versioned.ts",
     "pools:uniswap:all": "tsx ./scripts/pools/uniswap/all.ts",
-    "tokenlist:update": "tsx ./scripts/tokens/update.ts"
+    "tokenlist:update": "tsx ./scripts/tokens/update.ts",
+    "lint": "eslint scripts/**/*.ts --fix",
+    "lint:check": "eslint scripts/**/*.ts",
+    "format": "prettier --write scripts/**/*.ts",
+    "format:check": "prettier --check scripts/**/*.ts",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky install"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "@uniswap/sdk-core": "^7.7.2",
     "@uniswap/token-lists": "^1.0.0-beta.34",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "eslint": "^8.0.0",
     "graphql-request": "^7.2.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0",
+    "prettier": "^2.8.0",
     "tsx": "^4.19.4",
     "typescript": "5.8.3"
   },
   "packageManager": "yarn@1.22.22",
   "dependencies": {
     "graphql": "^16.11.0"
+  },
+  "lint-staged": {
+    "scripts/**/*.ts": [
+      "prettier --write",
+      "eslint --fix --max-warnings 10"
+    ]
   }
 }
