@@ -2,6 +2,53 @@ import { ChainId } from "@uniswap/sdk-core";
 
 import { gql, GraphQLClient } from "graphql-request";
 
+// Schema configuration for different subgraph providers
+type SubgraphSchema = {
+  tvlNativeField: "totalValueLockedETH" | "totalValueLockedNative";
+  supportsPoolFilter: boolean;
+  // Add more schema differences as needed
+};
+
+const SUBGRAPH_SCHEMAS: Record<number, SubgraphSchema> = {
+  [ChainId.MAINNET]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.POLYGON]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.ARBITRUM_ONE]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.BNB]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.AVALANCHE]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.OPTIMISM]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.BASE]: {
+    tvlNativeField: "totalValueLockedNative",
+    supportsPoolFilter: true,
+  },
+  [ChainId.BASE_SEPOLIA]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  [ChainId.UNICHAIN_SEPOLIA]: {
+    tvlNativeField: "totalValueLockedETH",
+    supportsPoolFilter: true,
+  },
+  // Add more chains as they're supported
+};
+
 // only necessary fields
 export type Pool = {
   id: string;
@@ -172,7 +219,7 @@ export abstract class SubgraphProvider<
     let poolsPage: TPool[] = [];
 
     let lastBlockNumber = blockNumber;
-    let lastIds = new Set<string>();
+    const lastIds = new Set<string>();
     let total = 0;
 
     do {
@@ -298,7 +345,7 @@ export class SubgraphProviderV2 extends SubgraphProvider<
 
   protected override poolFilter(variables: FilterVariables) {
     const { blockNumber, trackedReserveETH, tokens } = variables;
-    const filter = {};
+    const filter: Record<string, any> = {};
 
     if (Number.isFinite(blockNumber)) {
       filter["createdAtBlockNumber_gte"] = blockNumber;
@@ -359,7 +406,7 @@ export class SubgraphProviderV3 extends SubgraphProvider<
       case ChainId.POLYGON:
         return `${base}/EsLGwxyeMMeJuhqWvuLmJEiDKXJ4Z6YsoJreUnyeozco`;
       case ChainId.BASE:
-        return `${base}/GqzP4Xaehti8KSfQmv3ZctFSjnSUYZ4En5NRsiTbvZpz`;
+        return `${base}/HMuAwufqZ1YCRmzL2SfHTVkzZovC9VL2UAKhjvRqKiR1`;
       case ChainId.BASE_SEPOLIA:
         return `${base}/4xPAdAuU9HfbQhNdGCfZYBw45Ey6KB71R3dc4qCD5XhQ`;
       case ChainId.AVALANCHE:
@@ -376,8 +423,6 @@ export class SubgraphProviderV3 extends SubgraphProvider<
         return `${base}/GZWDNw5b7XH2iqnmG91FLDDkfEVEDQotfPv4GMdraEKY`;
       case ChainId.UNICHAIN_SEPOLIA:
         return `${base}/5Tf9s7syYLHQzhmtjukjTjmhFwx7c3hrdVxy4jo3TgCC`;
-      case ChainId.OPTIMISM:
-        return `${base}/EgnS9YE1avupkvCNj9fHnJxppfEmNNywYJtghqiu2pd9`;
       case ChainId.WORLDCHAIN:
         return "https://interface.gateway.uniswap.org/v1/graphql";
       default:
@@ -447,7 +492,7 @@ export class SubgraphProviderV3 extends SubgraphProvider<
 
   protected override poolFilter(variables: FilterVariables) {
     const { blockNumber, trackedReserveETH, tokens } = variables;
-    const filter = {
+    const filter: Record<string, any> = {
       liquidity_gt: 0,
     };
 
@@ -465,12 +510,22 @@ export class SubgraphProviderV3 extends SubgraphProvider<
     return filter;
   }
 
-  private getTVLNativeName(): string {
-    // only for this founded subgraph
-    if (this.chainId === ChainId.UNICHAIN_SEPOLIA) {
-      return "totalValueLockedNative";
+  private getSubgraphSchema(): SubgraphSchema {
+    const schema = SUBGRAPH_SCHEMAS[this.chainId];
+    if (!schema) {
+      console.warn(
+        `No schema configuration found for chainId ${this.chainId}, using default schema`
+      );
+      return {
+        tvlNativeField: "totalValueLockedETH",
+        supportsPoolFilter: true,
+      };
     }
-    return "totalValueLockedETH";
+    return schema;
+  }
+
+  private getTVLNativeName(): string {
+    return this.getSubgraphSchema().tvlNativeField;
   }
 
   protected override poolsQuery(): string {
@@ -592,7 +647,7 @@ export class SubgraphProviderV4 extends SubgraphProvider<
 
   protected override poolFilter(variables: FilterVariables) {
     const { blockNumber, trackedReserveETH, tokens } = variables;
-    const filter = {};
+    const filter: Record<string, any> = {};
 
     if (Number.isFinite(blockNumber)) {
       filter["createdAtBlockNumber_gte"] = blockNumber;
