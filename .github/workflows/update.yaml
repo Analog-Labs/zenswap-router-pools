@@ -26,6 +26,7 @@ jobs:
         with:
           token: ${{ secrets.POOL_AUTOMATION }}
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -52,7 +53,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Configure git to use the PAT token for authentication
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/zenswaplabs/zenswap-router-pools.git
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
           # Checkout main branch
           git checkout main
@@ -78,7 +79,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Configure git to use the PAT token for authentication
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/zenswaplabs/zenswap-router-pools.git
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
           # Fetch all branches
           git fetch origin
