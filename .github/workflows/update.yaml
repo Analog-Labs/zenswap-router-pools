@@ -2,55 +2,97 @@ name: Run Daily Pools Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      trigger_source:
+        description: "Source of the trigger"
+        required: false
+        default: "manual"
+        type: string
+  repository_dispatch:
+    types: [pools-update-requested]
 
 jobs:
-  run-node-script:
+  update-pools:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run script
+      - name: Run pools update script
         run: npm run pools:uniswap:all
-
-      - name: Commit and push changes to new branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRIGGER_SOURCE: ${{ github.event.inputs.trigger_source || github.event.client_payload.source || 'schedule' }}
+
+      - name: Update main branch
+        if: github.ref == 'refs/heads/main' || github.event_name == 'schedule'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          BRANCH_NAME="tech/pools-update"
           TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git fetch origin
+          # Checkout main branch
+          git checkout main
+          git pull origin main
 
-          if git ls-remote --exit-code --heads origin "$BRANCH_NAME"; then
-            echo "Branch '$BRANCH_NAME' exists. Checking it out."
-            git checkout "$BRANCH_NAME"
-            git pull origin "$BRANCH_NAME"
-          else
-            echo "Branch '$BRANCH_NAME' does not exist. Creating it."
-            git checkout -b "$BRANCH_NAME"
-          fi
-
+          # Check if there are changes to commit
           if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "No changes to commit on main branch."
           else
             git add .
-            git commit -m "Update pools $TIMESTAMP"
-            git push origin "$BRANCH_NAME"
+            git commit -m "Update pools $TIMESTAMP (triggered by: ${{ github.event.inputs.trigger_source || github.event.client_payload.source || 'schedule' }})"
+            git push origin main
+            echo "Successfully updated main branch with pools data."
+          fi
+
+      - name: Update fix/router-hopping branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch all branches
+          git fetch origin
+
+          # Check if fix/router-hopping branch exists
+          if git ls-remote --exit-code --heads origin "fix/router-hopping"; then
+            echo "Branch 'fix/router-hopping' exists. Checking it out."
+            git checkout fix/router-hopping
+            git pull origin fix/router-hopping
+          else
+            echo "Branch 'fix/router-hopping' does not exist. Creating it from main."
+            git checkout -b fix/router-hopping main
+          fi
+
+          # Check if there are changes to commit
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes to commit on fix/router-hopping branch."
+          else
+            git add .
+            git commit -m "Update pools $TIMESTAMP (triggered by: ${{ github.event.inputs.trigger_source || github.event.client_payload.source || 'schedule' }})"
+            git push origin fix/router-hopping
+            echo "Successfully updated fix/router-hopping branch with pools data."
           fi
