@@ -51,6 +51,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # Configure git to use the PAT token for authentication
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/zenswaplabs/zenswap-router-pools.git
+
           # Checkout main branch
           git checkout main
           git pull origin main
@@ -73,6 +76,9 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Configure git to use the PAT token for authentication
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/zenswaplabs/zenswap-router-pools.git
 
           # Fetch all branches
           git fetch origin
