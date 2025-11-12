@@ -39,6 +39,7 @@
   },
   "packageManager": "yarn@1.22.22",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "graphql": "^16.11.0"
   },
   "lint-staged": {
