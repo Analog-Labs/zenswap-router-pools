@@ -8,7 +8,8 @@ on:
 jobs:
   run-node-script:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,13 +25,16 @@ jobs:
         run: npm install
 
       - name: Run script
+        env:
+          THE_GRAPH_API_KEY: ${{ secrets.THE_GRAPH_API_KEY }}
         run: npm run pools:uniswap:all
 
       - name: Commit and push changes to new branch
         env:
+          THE_GRAPH_API_KEY: ${{ secrets.THE_GRAPH_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH_NAME="tech/pools-update"
+          BRANCH_NAME="main"
           TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
 
           git config user.name "github-actions[bot]"

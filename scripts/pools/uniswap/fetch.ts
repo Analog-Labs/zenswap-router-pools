@@ -1,9 +1,16 @@
-import fs from 'fs';
+import fs from "fs";
+import dotenv from "dotenv";
 
-import { getProvider } from './provider';
-import { getNetworkId } from './utils';
+import { getProvider } from "./provider";
+import { getNetworkId } from "./utils";
 
-const apiKey = '606af22308a2e5690afe6ef924423911';
+dotenv.config();
+
+const apiKey = process.env.THE_GRAPH_API_KEY;
+
+if (!apiKey) {
+  throw new Error("THE_GRAPH_API_KEY not set in .env or environment");
+}
 
 // query varibles
 const pageSize = 100;
@@ -13,13 +20,18 @@ function readLocalFile(dir: string, filename: string): string | null {
   const path = `${dir}/${filename}`;
 
   if (fs.existsSync(path)) {
-    return fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
+    return fs.readFileSync(path, { encoding: "utf8", flag: "r" });
   } else {
     return null;
   }
 }
 
-function writeLocalFile(dir: string, filename: string, data: string, append = false): void {
+function writeLocalFile(
+  dir: string,
+  filename: string,
+  data: string,
+  append = false
+): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
   }
@@ -27,7 +39,7 @@ function writeLocalFile(dir: string, filename: string, data: string, append = fa
   const path = `${dir}/${filename}`;
   const method = append ? fs.appendFileSync : fs.writeFileSync;
 
-  method(path, data, 'utf-8');
+  method(path, data, "utf-8");
 
   if (!append) {
     console.info(`File updated: "${path}"`);
@@ -43,8 +55,8 @@ function removeLocalFile(dir: string, filename: string): void {
   }
 }
 
-const ROW_DELIMETER = '\r\n';
-const CELL_DELIMETER = ';';
+const ROW_DELIMETER = "\r\n";
+const CELL_DELIMETER = ";";
 
 export type PoolsArgs = {
   chainId: number | null;
@@ -62,15 +74,15 @@ function findArg(args: string[], name: string) {
 export function parseArgs(): PoolsArgs {
   const args = process.argv.slice(2);
 
-  const chainIdArg = findArg(args, '--chainId');
+  const chainIdArg = findArg(args, "--chainId");
   const chainId = chainIdArg ? +chainIdArg : null;
 
-  const versionArg = findArg(args, '--version');
+  const versionArg = findArg(args, "--version");
   const version = versionArg ? +versionArg : null;
 
-  const whitelist = !!args.find((arg) => arg === '--whitelist');
+  const whitelist = !!args.find((arg) => arg === "--whitelist");
 
-  const reserveArg = findArg(args, '--reserve');
+  const reserveArg = findArg(args, "--reserve");
   const reserve = reserveArg ? +reserveArg : null;
 
   return {
@@ -84,16 +96,18 @@ export function parseArgs(): PoolsArgs {
 export async function fetchPools(args: PoolsArgs): Promise<void> {
   const { chainId, version, whitelist, reserve } = args;
 
-  console.info('\n');
-  console.info(`[${chainId}] Fetch uniswap pools, version: ${version}, whitelist tokens: ${whitelist};`);
+  console.info("\n");
+  console.info(
+    `[${chainId}] Fetch uniswap pools, version: ${version}, whitelist tokens: ${whitelist};`
+  );
 
   if (!chainId) {
-    console.info('`chainId` is not set! Set it using `--chainId` argument');
+    console.info("`chainId` is not set! Set it using `--chainId` argument");
     process.exit();
   }
 
   if (!version) {
-    console.info('`version` is not set! Set it using `--version` argument');
+    console.info("`version` is not set! Set it using `--version` argument");
     process.exit();
   }
 
@@ -122,7 +136,7 @@ export async function fetchPools(args: PoolsArgs): Promise<void> {
   const tokens = new Set<string>();
 
   if (whitelist) {
-    const tokensList = readLocalFile('./public/tokens/lists', 'zenswap.json');
+    const tokensList = readLocalFile("./public/tokens/lists", "zenswap.json");
 
     if (tokensList) {
       const items = JSON.parse(tokensList).tokens;
@@ -135,13 +149,18 @@ export async function fetchPools(args: PoolsArgs): Promise<void> {
 
       if (version === 4) {
         // native ETH
-        tokens.add('0x0000000000000000000000000000000000000000');
+        tokens.add("0x0000000000000000000000000000000000000000");
       }
     }
   }
 
   const trackedReserveETH = reserve ?? TRACKED_RESERVE_ETH_DEFAULT;
-  const variables = { blockNumber, pageSize, trackedReserveETH, tokens: [...tokens] };
+  const variables = {
+    blockNumber,
+    pageSize,
+    trackedReserveETH,
+    tokens: [...tokens],
+  };
 
   await provider.getAllPools(variables, (pagePools) => {
     pagePools.forEach((pool) => {
