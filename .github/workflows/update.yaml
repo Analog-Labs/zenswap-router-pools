@@ -28,6 +28,7 @@ jobs:
 
       - name: Commit and push changes to new branch
         env:
+          THE_GRAPH_API_KEY: ${{ secrets.THE_GRAPH_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME="tech/pools-update"
