@@ -24,6 +24,8 @@ jobs:
         run: npm install
 
       - name: Run script
+        env:
+          THE_GRAPH_API_KEY: ${{ secrets.THE_GRAPH_API_KEY }}
         run: npm run pools:uniswap:all
 
       - name: Commit and push changes to new branch
